@@ -230,6 +230,21 @@ def get_user(token, fields):
     }
     return _make_request(token, method_name, 'get', params=params)
 
+# Milestones
+def create_milestone(token, board_id, milestone_name, due_date, description=None):
+    method_name = 'boards/{}/milestones'.format(board_id)
+    data = {'name': milestone_name,
+            'due_date': due_date,
+            'state' : 'open'}
+    if description:
+        data['description'] = description
+
+    return _make_request(token, method_name, 'post', json_params=data)
+
+def delete_milestone(token, board_id, milestone_id):
+    method_name = 'boards/{}/milestones/{}'.format(board_id,milestone_id)
+    return _make_request(token, method_name, 'delete')
+
 
 class GloException(Exception):
     pass

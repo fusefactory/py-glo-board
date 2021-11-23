@@ -46,9 +46,15 @@ class Board:
             for member in obj.get('members'):
                 members.append(Label.de_json(member))
 
-        return cls(id, name, archived_columns, archived_date, columns, created_by, created_date, invited_members, labels, members)
+        milestones = obj.get('milestones')
+        if milestones:
+            milestones = []
+            for milestone in obj.get('milestones'):
+                milestones.append(Milestone.de_json(milestone))
 
-    def __init__(self, id, name, archived_columns, archived_date, columns, created_by, created_date, invited_members, labels, members):
+        return cls(id, name, archived_columns, archived_date, columns, created_by, created_date, invited_members, labels, members, milestones)
+
+    def __init__(self, id, name, archived_columns, archived_date, columns, created_by, created_date, invited_members, labels, members, milestones):
         self.id = id
         self.name = name
         self.archived_columns = archived_columns
@@ -59,6 +65,7 @@ class Board:
         self.invited_members = invited_members
         self.labels = labels
         self.members = members
+        self.milestones = milestones
 
     def to_dic(self):
         return {
@@ -71,7 +78,8 @@ class Board:
             'created_date': self.created_date.strftime("%Y-%m-%dT%H:%M:%S.%fZ") if self.created_date else None,
             'invited_members': [invited_member.to_dict() for invited_member in self.invited_members] if self.invited_members else None,
             'labels': [label.to_dict() for label in self.labels] if self.labels else None,
-            'members': [member.to_dict() for member in self.members] if self.members else None
+            'members': [member.to_dict() for member in self.members] if self.members else None,
+            'milestones': [milestone.to_dict() for milestone in self.milestones] if self.milestones else None
         }
 
 
@@ -365,4 +373,40 @@ class User:
             'name': self.name,
             'username': self.username,
             'email': self.email
+        }
+
+class Milestone:
+    @classmethod
+    def de_json(cls, obj):
+        id = obj.get('id')
+        name = obj.get('name')
+        created_date = obj.get('created_date')
+        if created_date:
+            created_date = datetime.strptime(created_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        created_by = obj.get('created_by')
+        due_date = obj.get('due_date')
+        if due_date:
+            due_date = datetime.strptime(due_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+        description = obj.get('description')
+        state = obj.get('state')
+        return cls(id, name, created_date, created_by, due_date, description, state)
+
+    def __init__(self, id, name, created_date, created_by, due_date, description, state):
+        self.id = id
+        self.name = name
+        self.created_date = created_date
+        self.created_by = created_by
+        self.due_date = due_date
+        self.description = description
+        self.state = state
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'created_date': self.created_date.strftime("%Y-%m-%dT%H:%M:%S.%fZ") if self.created_date else None,
+            'created_by': self.created_by,
+            'due_date': self.due_date.strftime("%Y-%m-%dT%H:%M:%S.%fZ") if self.due_date else None,
+            'description': self.description,
+            'state': self.state,
         }
